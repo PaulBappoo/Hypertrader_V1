@@ -1,6 +1,8 @@
 // Crypto Model for Hypertrader V1
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
+import { DataTypes } from 'sequelize';
+import db from '../config/database.js';
+
+const { sequelize } = db;
 
 // Define the Cryptocurrency model
 const Cryptocurrency = sequelize.define('Cryptocurrency', {
@@ -142,4 +144,4 @@ const CryptoModel = {
     }
 };
 
-module.exports = CryptoModel; 
+export default CryptoModel; 

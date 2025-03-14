@@ -1,9 +1,10 @@
 // Database Configuration for Hypertrader V1
-const { Sequelize } = require('sequelize');
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
 
 // Initialize dotenv if available
 try {
-    require('dotenv').config();
+    dotenv.config();
 } catch (err) {
     console.log('dotenv not loaded');
 }
@@ -52,7 +53,7 @@ const testConnection = async () => {
     }
 };
 
-module.exports = {
+export default {
     sequelize,
     testConnection
 }; 

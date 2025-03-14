@@ -1,10 +1,12 @@
 // API Routes for Hypertrader V1
 
-const express = require('express');
-const router = express.Router();
-const CryptoModel = require('../models/crypto');
+import express from 'express';
+import fetch from 'node-fetch';
+import CryptoModel from '../models/crypto.js';
 
-// Get all cryptocurrencies
+const router = express.Router();
+
+// Get all cryptocurrencies from database
 router.get('/crypto', async (req, res) => {
     try {
         const cryptos = await CryptoModel.getAll();
@@ -57,4 +59,29 @@ router.delete('/crypto/:id', async (req, res) => {
     }
 });
 
-module.exports = router; 
+// Binance API proxy for exchange info (to avoid CORS issues)
+router.get('/binance/exchangeInfo', async (req, res) => {
+    try {
+        const response = await fetch('https://api.binance.com/api/v3/exchangeInfo');
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching Binance exchange info:', error);
+        res.status(500).json({ error: 'Failed to fetch from Binance API' });
+    }
+});
+
+// Binance API proxy for ticker data
+router.get('/binance/ticker/:symbol', async (req, res) => {
+    try {
+        const symbol = req.params.symbol;
+        const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Error fetching Binance ticker data:', error);
+        res.status(500).json({ error: 'Failed to fetch ticker data from Binance API' });
+    }
+});
+
+export default router; 

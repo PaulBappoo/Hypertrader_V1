@@ -1,11 +1,16 @@
 // Hypertrader V1 - Backend Server
 
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const apiRoutes = require('./routes/api');
-const db = require('./config/database');
-const CryptoModel = require('./models/crypto');
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import apiRoutes from './routes/api.js';
+import db from './config/database.js';
+import CryptoModel from './models/crypto.js';
+
+// Get the current file directory (ES module equivalent of __dirname)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create Express app
 const app = express();
