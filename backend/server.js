@@ -4,7 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const apiRoutes = require('./routes/api');
-const dbConfig = require('./config/database');
+const db = require('./config/database');
+const CryptoModel = require('./models/crypto');
 
 // Create Express app
 const app = express();
@@ -35,17 +36,28 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
-// Database connection (placeholder for now)
-const connectDatabase = () => {
-    console.log('Database connection would be established here');
-    console.log(`Connection string would be: ${dbConfig.getConnectionString()}`);
-    // Will implement actual database connection later
+// Database connection and initialization
+const initializeDatabase = async () => {
+    try {
+        // Test database connection
+        const connected = await db.testConnection();
+        
+        if (connected) {
+            // Initialize tables
+            await CryptoModel.initTables();
+            console.log('Database initialized successfully');
+        } else {
+            console.error('Failed to initialize database');
+        }
+    } catch (error) {
+        console.error('Database initialization error:', error);
+    }
 };
 
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Hypertrader V1 server is running on port ${PORT}`);
-    connectDatabase();
+    await initializeDatabase();
 });
 
 // Error handling

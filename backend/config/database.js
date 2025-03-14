@@ -1,30 +1,58 @@
 // Database Configuration for Hypertrader V1
+const { Sequelize } = require('sequelize');
 
-// This file will contain database connection settings
-// It's kept minimal now but will be expanded with actual database setup
+// Initialize dotenv if available
+try {
+    require('dotenv').config();
+} catch (err) {
+    console.log('dotenv not loaded');
+}
 
-const dbConfig = {
-    // These would be set via environment variables in a real application
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 27017,
-    name: process.env.DB_NAME || 'hypertrader',
-    user: process.env.DB_USER || '',
-    password: process.env.DB_PASSWORD || '',
-    
-    // Connection options
-    options: {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        // other options would go here
-    },
-    
-    // Get connection string (for MongoDB example)
-    getConnectionString: function() {
-        const auth = this.user && this.password 
-            ? `${this.user}:${this.password}@` 
-            : '';
-        return `mongodb://${auth}${this.host}:${this.port}/${this.name}`;
+// Extract database connection info from environment variables
+// Format for Render PostgreSQL: postgres://user:password@host:port/database
+const dbUrl = process.env.DATABASE_URL || process.env.RENDER_DATABASE_URL;
+
+let sequelize;
+
+if (dbUrl) {
+    // For production: use the provided database URL
+    sequelize = new Sequelize(dbUrl, {
+        dialect: 'postgres',
+        ssl: true,
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false, // For Render PostgreSQL
+            }
+        },
+        logging: false
+    });
+} else {
+    // For development: use local config
+    sequelize = new Sequelize({
+        database: process.env.DB_NAME || 'hypertrader',
+        username: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 5432,
+        dialect: 'postgres',
+        logging: false
+    });
+}
+
+// Test the connection
+const testConnection = async () => {
+    try {
+        await sequelize.authenticate();
+        console.log('Database connection has been established successfully.');
+        return true;
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+        return false;
     }
 };
 
-module.exports = dbConfig; 
+module.exports = {
+    sequelize,
+    testConnection
+}; 
